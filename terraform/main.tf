@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+    random = {
+      source = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
 provider "aws" {
   region                      = "us-east-1"
   access_key                  = "test"
@@ -12,15 +25,20 @@ provider "aws" {
   }
 }
 
-# Génère un ID aléatoire à chaque exécution
-resource "random_id" "ami_id" {
-  byte_length = 4
+# Génére une valeur aléatoire pour forcer un changement d'AMI
+resource "random_id" "ami_randomizer" {
+  byte_length = 2
 }
 
 resource "aws_instance" "demo" {
-  ami           = "ami-${random_id.ami_id.hex}" # Change à chaque run
+  ami           = "ami-${random_id.ami_randomizer.hex}"
   instance_type = "t2.micro"
+
   tags = {
-    Name = "AutoInstance"
+    Name = "LocalStackDemo"
   }
+}
+
+output "instance_id" {
+  value = aws_instance.demo.id
 }
